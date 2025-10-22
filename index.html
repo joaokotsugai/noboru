@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defesa Aquática - Teclas WASD</title>
+    <!-- Link para o Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Link para o seu arquivo CSS personalizado -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Importar fonte para estilo pixel art (Press Start 2P) -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="title">Defesa Aquática WASD</h1>
+        
+        <div id="score-info" class="hidden">PONTOS: <span id="current-score">0</span></div>
+        <div id="timer-info" class="hidden">TEMPO: <span id="game-timer">60</span>s</div>
+        <div id="lives-info" class="hidden">VIDAS: <span id="game-lives">3</span></div>
+
+        <div id="instructions">
+            Clique em "Começar" e pressione as teclas correspondentes<br>
+            para limpar a poluição! Cuidado com os erros e o tempo!
+        </div>
+
+        <div id="game-area">
+            <!-- Os itens de poluição serão gerados aqui pelo JavaScript -->
+        </div>
+
+        <div id="start-menu">
+            <button id="start-button">
+                COMEÇAR (60s)
+            </button>
+            <button id="infinite-button">
+                MODO INFINITO
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden">
+            <h2 class="text-4xl font-bold mb-4">FIM DE JOGO!</h2>
+            <p class="text-2xl mb-6">Sua Pontuação Final: <span id="final-score">0</span></p>
+            <div class="game-over-actions">
+                <button id="restart-button" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg mr-4">
+                    JOGAR NOVAMENTE
+                </button>
+                <button id="back-button" class="px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-lg">
+                    VOLTAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link para o seu arquivo JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
