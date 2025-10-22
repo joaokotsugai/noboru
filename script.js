@@ -32,14 +32,26 @@ let isGameRunning = false;
 let difficultyLevel = 0; // Controla o nível de dificuldade
 
 // --- NOVAS VARIÁVEIS PARA DIFICULDADE E PENALIDADES ---
-const MAX_ITEM_SPEED = 1000; // Velocidade máxima (item sobe em 1s)
-const MIN_GENERATION_DELAY = 300; // Geração mínima (item a cada 0.3s)
 const PASS_PENALTY_TIME = 3; // Segundos a perder se um item passar (modo cronometrado)
 const WRONG_KEY_PENALTY_TIME = 2; // Segundos a perder se apertar tecla errada (modo cronometrado)
 
+// Ajustes de vidas: agora acumuláveis (começa com START_LIVES e pode crescer até MAX_LIVES)
+const START_LIVES = 3;        // vidas iniciais no modo infinito
+const MAX_LIVES = 6;          // cap de vidas acumuláveis (pode ajustar)
 let isInfiniteMode = false;
-let lives = 3;
-const MAX_LIVES = 3;
+let lives = START_LIVES;
+
+// NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA (MODO INFINITO)
+let lifeCharge = 0;
+const LIFE_CHARGE_REQUIRED = 3; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
+
+// Controle mais lento de dificuldade: só aumenta a cada N gerações
+let generationCount = 0;
+const DIFFICULTY_STEP = 4; // aumenta dificuldade a cada 4 itens gerados
+const ITEM_SPEED_DECREMENT = 30; // decremento menor (era 50)
+const GENERATION_DELAY_DECREMENT = 5; // decremento menor (era 10)
+const MAX_ITEM_SPEED = 1000; // Velocidade máxima (item sobe em 1s)
+const MIN_GENERATION_DELAY = 300; // Geração mínima (item a cada 0.3s)
 
 // Função para iniciar o jogo
 function startGame(mode = 'timed') {
@@ -53,7 +65,12 @@ function startGame(mode = 'timed') {
     difficultyLevel = 0;
     activeItems = [];
     isGameRunning = true;
-    lives = MAX_LIVES;
+    // agora começa com START_LIVES, mas pode acumular até MAX_LIVES
+    lives = START_LIVES;
+
+    // reset da recarga de vida
+    lifeCharge = 0;
+    generationCount = 0;
 
     // Resetar display e limpar a área de jogo
     currentScoreSpan.textContent = score;
@@ -134,28 +151,36 @@ function generatePollutionItem() {
         item.style.transform = `translateY(-${gameArea.offsetHeight + item.offsetHeight + 10}px)`; 
     }, 50);
 
-    item.addEventListener('transitionend', () => {
-        if (isGameRunning && item.parentNode === gameArea) {
-            if (isInfiniteMode) {
-                // Perde vida no modo infinito
-                lives = Math.max(0, lives - 1);
-                gameLivesSpan.textContent = lives;
-                if (lives <= 0) {
-                    endGame();
-                }
-            } else {
-                // Perde tempo no modo cronometrado
-                gameTime = Math.max(0, gameTime - PASS_PENALTY_TIME);
-                gameTimerSpan.textContent = gameTime;
-                if (gameTime <= 0) {
-                    endGame();
-                }
+    item.addEventListener('transitionend', (e) => {
+        // Só reagir à transição de transform (movimento)
+        if (e.propertyName !== 'transform') return;
+        // Se o item já foi acertado (classe 'hit'), não penaliza — ele será removido no animationend
+        if (item.classList.contains('hit')) return;
+        // Garante que o jogo ainda esteja rodando e o item esteja na área
+        if (!isGameRunning || item.parentNode !== gameArea) return;
+
+        if (isInfiniteMode) {
+            // Perde vida no modo infinito
+            lives = Math.max(0, lives - 1);
+            gameLivesSpan.textContent = lives;
+            if (lives <= 0) {
+                endGame();
             }
-            removePollutionItem(item);
+        } else {
+            // Perde tempo no modo cronometrado
+            gameTime = Math.max(0, gameTime - PASS_PENALTY_TIME);
+            gameTimerSpan.textContent = gameTime;
+            if (gameTime <= 0) {
+                endGame();
+            }
         }
+
+        // Remove o item que escapou
+        removePollutionItem(item);
     });
 
-    // Aumenta a dificuldade gradualmente
+    // Contador de gerações e aumento de dificuldade controlado
+    generationCount++;
     increaseDifficulty();
 }
 
@@ -186,6 +211,34 @@ function handleKeyPress(event) {
         targetItem.addEventListener('animationend', () => {
             removePollutionItem(targetItem);
         });
+
+        // NOVA LÓGICA: carregar vida apenas no modo infinito
+        if (isInfiniteMode) {
+            lifeCharge++;
+            // Quando atingir o necessário, recupera 1 vida (até MAX_LIVES).
+            // Se houver carga extra, pode gerar múltiplas vidas (até o limite).
+            while (lifeCharge >= LIFE_CHARGE_REQUIRED && lives < MAX_LIVES) {
+                lives = Math.min(MAX_LIVES, lives + 1);
+                lifeCharge -= LIFE_CHARGE_REQUIRED;
+            }
+            gameLivesSpan.textContent = lives;
+
+            // feedback visual rápido quando recupera ao menos 1 vida
+            if (gameArea.style.borderColor !== '') {
+                // já existe algum estilo, apenas flashar quando houve recuperação
+            }
+            // flash verde se recuperou alguma vida
+            // (apenas visual: detecta se lifeCharge foi reduzido recentemente)
+            // Para simplicidade, flash se a vida aumentou
+            // (não mantém prevBorder detalhado)
+            if (lives > 0) {
+                const prevBorder = gameArea.style.borderColor;
+                gameArea.style.borderColor = '#4ade80'; // verde claro
+                setTimeout(() => {
+                    gameArea.style.borderColor = prevBorder || '#3a506b';
+                }, 300);
+            }
+        }
     } else {
         if (isInfiniteMode) {
             // Perde uma vida no modo infinito
@@ -216,10 +269,14 @@ function handleKeyPress(event) {
 
 // Função para aumentar a dificuldade
 function increaseDifficulty() {
+    // Só aumenta a dificuldade a cada DIFFICULTY_STEP gerações
+    if (generationCount % DIFFICULTY_STEP !== 0) return;
+
     difficultyLevel++;
 
-    itemSpeed = Math.max(MAX_ITEM_SPEED, itemSpeed - 50);
-    generationDelay = Math.max(MIN_GENERATION_DELAY, generationDelay - 10);
+    // decrementos menores para dar mais tempo antes de ficar muito rápido
+    itemSpeed = Math.max(MAX_ITEM_SPEED, itemSpeed - ITEM_SPEED_DECREMENT);
+    generationDelay = Math.max(MIN_GENERATION_DELAY, generationDelay - GENERATION_DELAY_DECREMENT);
     
     if (itemGenerationInterval) {
         clearInterval(itemGenerationInterval);
@@ -245,6 +302,9 @@ function endGame() {
     });
     activeItems = [];
 
+    // reset da recarga de vida ao terminar
+    lifeCharge = 0;
+
     scoreInfo.classList.add('hidden');
     timerInfo.classList.add('hidden');
     livesInfo.classList.add('hidden');
@@ -267,6 +327,9 @@ function backToMenu() {
     currentScoreSpan.textContent = score;
     gameTimerSpan.textContent = 60;
     gameLivesSpan.textContent = MAX_LIVES;
+
+    // reset da recarga de vida ao voltar ao menu
+    lifeCharge = 0;
 
     // Mostrar menu / esconder game over
     gameOverScreen.classList.add('hidden');
