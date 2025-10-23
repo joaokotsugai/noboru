@@ -94,7 +94,7 @@ function startGame(mode = 'timed') {
     livesInfo.classList.remove('hidden'); // Sempre mostra as vidas
     backDuringGame.classList.remove('hidden'); // Mostra botão de voltar
 
-    // Timer ainda funciona em ambos os modos
+    // Timer 
     clearInterval(gameInterval);
     gameInterval = setInterval(() => {
         gameTime--;

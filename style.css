@@ -14,8 +14,8 @@ body {
 }
 
 #game-container {
-    width: 900px;
-    height: 600px;
+    width: 1200px; /* AUMENTADO */
+    height: 800px; /* AUMENTADO */
     background-color: #0f1c3a; /* Cor de água escura */
     border: 8px solid #3a506b; /* Borda robusta */
     border-radius: 15px;
@@ -25,8 +25,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px;
+    padding: 40px 20px 20px; /* Aumentado padding-top para dar espaço aos indicadores */
     box-sizing: border-box;
+    justify-content: space-between; /* Distribui o espaço verticalmente */
     /* Padrão de fundo sutil que lembra bolhas ou irregularidades subaquáticas */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="%230f1c3a"/><circle cx="20" cy="20" r="10" fill="%231a2c4a" opacity="0.4"/><circle cx="80" cy="80" r="10" fill="%231a2c4a" opacity="0.4"/><circle cx="20" cy="80" r="10" fill="%231a2c4a" opacity="0.4"/><circle cx="80" cy="20" r="10" fill="%231a2c4a" opacity="0.4"/></svg>');
     background-size: 80px; /* Tamanho do padrão de fundo */
@@ -36,18 +37,22 @@ body {
     font-family: 'Press Start 2P', cursive;
     color: #79d0f4; /* Azul claro aquático */
     font-size: 2.5em;
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Reduzido o margin-bottom */
     text-shadow: 4px 4px #000000; /* Sombra para destaque */
     letter-spacing: 2px; /* Espaçamento entre letras */
 }
 
-#score-info, #timer-info {
+#score-info, #timer-info, #lives-info {
     position: absolute;
-    top: 25px;
-    color: #a0dfff; /* Cor para informações */
-    font-size: 1.5em;
+    top: 15px; /* Movido um pouco mais para cima */
+    color: #a0dfff;
+    font-size: 1.2em;
     text-shadow: 2px 2px #000000;
     font-family: 'Press Start 2P', cursive;
+    z-index: 50; /* Garante que fique acima de outros elementos */
+    background-color: rgba(15, 28, 58, 0.8); /* Fundo semi-transparente */
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
 #score-info {
@@ -59,110 +64,22 @@ body {
     color: #ffda79; /* Amarelo para o tempo */
 }
 
-#instructions {
-    margin-top: 120px; /* Ajustado para dar espaço à história */
-    color: #d1d8e0;
-    font-size: 1.2em;
-    text-align: center;
-    line-height: 1.5;
-    font-family: 'Press Start 2P', cursive;
-    text-shadow: 1px 1px #000000;
+#lives-info {
+    left: 50%;
+    transform: translateX(-50%);
+    color: #f9a826;
 }
 
-#game-area {
-    width: 90%;
-    height: 350px; /* Área principal do jogo */
-    background-color: #0d172a; /* Fundo mais escuro para a área de jogo */
-    border: 4px solid #3a506b; /* Borda da área de jogo */
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-    margin-top: 20px; /* Reduzido o margin-top */
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.6); /* Sombra interna para profundidade */
-    transition: border-color 0.1s ease-in-out; /* Transição suave para a borda de erro */
-}
-
-.pollution-item {
-    position: absolute;
-    bottom: -80px; /* Começa mais abaixo para maior tempo de subida */
-    width: 70px;
-    height: 70px;
-    background-color: #6b4e3e; /* Cor de lixo base */
-    border-radius: 50%; /* Lixo em formato de bolha/objeto arredondado */
+/* Ajuste para o container dos botões */
+#start-menu {
     display: flex;
-    justify-content: center;
+    gap: 20px;
     align-items: center;
-    font-size: 2.5em;
-    color: #f7fafc; /* Cor do texto da tecla */
-    font-weight: bold;
-    text-shadow: 2px 2px #000000;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Sombra para dar volume */
-    font-family: 'Press Start 2P', cursive;
-    border: 3px solid #8d6e63; /* Borda para destaque */
-    transition: transform linear; /* Transição linear para o movimento de subida */
-    z-index: 10; /* Garante que os itens fiquem acima do fundo */
-}
-
-/* Estilos para os ícones das teclas WASD e suas cores */
-/* Atualize seletores para usar prefixo "key-" */
-.pollution-item.key-w { background-color: #d14747; } /* Vermelho para W */
-.pollution-item.key-a { background-color: #47a3d1; } /* Azul para A */
-.pollution-item.key-s { background-color: #47d17e; } /* Verde para S */
-.pollution-item.key-d { background-color: #d1a347; } /* Laranja para D */
-
-/* NOVAS CORES PARA AS TECLAS ADICIONADAS */
-.pollution-item.key-q { background-color: #8b5cf6; } /* Roxo */
-.pollution-item.key-e { background-color: #ec4899; } /* Rosa */
-.pollution-item.key-r { background-color: #10b981; } /* Verde teal */
-.pollution-item.key-t { background-color: #f59e0b; } /* Amarelo */
-.pollution-item.key-y { background-color: #6366f1; } /* Índigo */
-.pollution-item.key-f { background-color: #06b6d4; } /* Ciano */
-.pollution-item.key-g { background-color: #f43f5e; } /* Rosa avermelhado */
-.pollution-item.key-h { background-color: #a855f7; } /* Violeta */
-.pollution-item.key-j { background-color: #0d9488; } /* Verde escuro */
-.pollution-item.key-z { background-color: #ef4444; } /* Vermelho mais forte */
-.pollution-item.key-x { background-color: #22c55e; } /* Verde brilhante */
-.pollution-item.key-c { background-color: #3b82f6; } /* Azul forte */
-.pollution-item.key-v { background-color: #f97316; } /* Laranja escuro */
-.pollution-item.key-b { background-color: #6b7280; } /* Cinza */
-/* Adicione mais se expandir 'possibleKeys' ainda mais! */
-
-
-/* Animação de acerto (item "estoura" e some) */
-.hit {
-    animation: pop-fade 0.3s ease-out forwards;
-}
-
-@keyframes pop-fade {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.5); opacity: 0.8; }
-    100% { transform: scale(0); opacity: 0; }
-}
-
-/* Estilo para o botão de início e reiniciar */
-#start-button, #restart-button, #infinite-button {
-    background-color: #3f82f6; /* Azul do botão */
-    color: white;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 1.8em;
-    cursor: pointer;
-    margin-top: 60px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 8px #2d66cf; /* Sombra para botão 3D */
-    font-family: 'Press Start 2P', cursive;
-    letter-spacing: 1px;
-    border: none; /* Remove borda padrão de botões */
-    z-index: 20; /* Garante que o botão fique acima da tela de game over se sobreposto */
-}
-#start-button:hover, #restart-button:hover, #infinite-button:hover {
-    background-color: #2b6cb0;
-    transform: translateY(-2px); /* Efeito de levantar */
-    box-shadow: 0 10px #2d66cf;
-}
-#start-button:active, #restart-button:active, #infinite-button:active {
-    transform: translateY(4px); /* Efeito de pressionar */
-    box-shadow: 0 4px #2d66cf;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    position: relative; /* Adicionado position relative */
+    z-index: 30; /* Garantir que fique acima de outros elementos */
 }
 
 /* Estilo para o container de botões do menu (para alinhar os dois botões) */
@@ -238,19 +155,113 @@ body {
     font-family: 'Press Start 2P', cursive;
     color: #79d0f4;
     font-size: 0.8em;
-    line-height: 1.8;
+    line-height: 1.5;
     text-shadow: 2px 2px #000000;
     margin: 10px auto;
-    max-width: 600px;
+    max-width: 800px;
     animation: fadeIn 1.5s ease-in;
-    position: absolute;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
+    text-align: center;
+    padding: 0 20px;
+    white-space: pre-line; /* Isso vai respeitar as quebras de linha */
 }
 
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+/* Ajuste para a área do jogo */
+#game-area {
+    width: 90%;
+    height: 500px; /* AUMENTADO */
+    margin: 20px 0;
+    background-color: #0d172a;
+    border: 4px solid #3a506b;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    z-index: 10; /* Menor que os indicadores */
+}
+
+.pollution-item {
+    position: absolute;
+    bottom: -80px; /* Começa mais abaixo para maior tempo de subida */
+    width: 70px;
+    height: 70px;
+    background-color: #6b4e3e; /* Cor de lixo base */
+    border-radius: 50%; /* Lixo em formato de bolha/objeto arredondado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5em;
+    color: #f7fafc; /* Cor do texto da tecla */
+    font-weight: bold;
+    text-shadow: 2px 2px #000000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Sombra para dar volume */
+    font-family: 'Press Start 2P', cursive;
+    border: 3px solid #8d6e63; /* Borda para destaque */
+    transition: transform linear; /* Transição linear para o movimento de subida */
+    z-index: 10; /* Garante que os itens fiquem acima do fundo */
+}
+
+/* Estilos para os ícones das teclas WASD e suas cores */
+/* Atualize seletores para usar prefixo "key-" */
+.pollution-item.key-w { background-color: #d14747; } /* Vermelho para W */
+.pollution-item.key-a { background-color: #47a3d1; } /* Azul para A */
+.pollution-item.key-s { background-color: #47d17e; } /* Verde para S */
+.pollution-item.key-d { background-color: #d1a347; } /* Laranja para D */
+
+/* NOVAS CORES PARA AS TECLAS ADICIONADAS */
+.pollution-item.key-q { background-color: #8b5cf6; } /* Roxo */
+.pollution-item.key-e { background-color: #ec4899; } /* Rosa */
+.pollution-item.key-r { background-color: #10b981; } /* Verde teal */
+.pollution-item.key-t { background-color: #f59e0b; } /* Amarelo */
+.pollution-item.key-y { background-color: #6366f1; } /* Índigo */
+.pollution-item.key-f { background-color: #06b6d4; } /* Ciano */
+.pollution-item.key-g { background-color: #f43f5e; } /* Rosa avermelhado */
+.pollution-item.key-h { background-color: #a855f7; } /* Violeta */
+.pollution-item.key-j { background-color: #0d9488; } /* Verde escuro */
+.pollution-item.key-z { background-color: #ef4444; } /* Vermelho mais forte */
+.pollution-item.key-x { background-color: #22c55e; } /* Verde brilhante */
+.pollution-item.key-c { background-color: #3b82f6; } /* Azul forte */
+.pollution-item.key-v { background-color: #f97316; } /* Laranja escuro */
+.pollution-item.key-b { background-color: #6b7280; } /* Cinza */
+/* Adicione mais se expandir 'possibleKeys' ainda mais! */
+
+
+/* Animação de acerto (item "estoura" e some) */
+.hit {
+    animation: pop-fade 0.3s ease-out forwards;
+}
+
+@keyframes pop-fade {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.8; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+/* Estilo para o botão de início e reiniciar */
+#start-button, #restart-button, #infinite-button {
+    background-color: #3f82f6;
+    color: white;
+    padding: 10px 20px; /* Reduzido um pouco o padding */
+    border-radius: 10px;
+    font-size: 1.2em; /* Reduzido um pouco o tamanho da fonte */
+    cursor: pointer;
+    margin-top: 0; /* Remove margin-top dos botões */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 8px #2d66cf;
+    font-family: 'Press Start 2P', cursive;
+    letter-spacing: 1px;
+    border: none;
+    z-index: 20;
+}
+#start-button:hover, #restart-button:hover, #infinite-button:hover {
+    background-color: #2b6cb0;
+    transform: translateY(-2px); /* Efeito de levantar */
+    box-shadow: 0 10px #2d66cf;
+}
+#start-button:active, #restart-button:active, #infinite-button:active {
+    transform: translateY(4px); /* Efeito de pressionar */
+    box-shadow: 0 4px #2d66cf;
 }
