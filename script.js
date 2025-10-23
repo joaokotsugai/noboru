@@ -22,10 +22,10 @@ let score = 0;
 let gameTime = 60; // Segundos de jogo para modo cronometrado
 let gameInterval; // Para o temporizador do jogo
 let itemGenerationInterval; // Para a geração de itens de poluição
-let itemSpeed = 2000;
+let itemSpeed = 9000;
 let generationDelay = 1000;
-const MAX_ITEM_SPEED = 500;
-const MIN_GENERATION_DELAY = 200;
+const MAX_ITEM_SPEED = 200;
+const MIN_GENERATION_DELAY = 100;
 let activeItems = []; // Guarda os itens de poluição atualmente na tela
 
 const possibleKeys = ['w', 'a', 's', 'd', 
@@ -33,11 +33,9 @@ const possibleKeys = ['w', 'a', 's', 'd',
     'i']; 
 
 let isGameRunning = false;
-let difficultyLevel = 0; // Controla o nível de dificuldade
+let difficultyLevel = 0; // 
 
-// --- NOVAS VARIÁVEIS PARA DIFICULDADE E PENALIDADES ---
-// REMOVIDA: PASS_PENALTY_TIME não será mais usada, pois perderá vida
-// REMOVIDA: WRONG_KEY_PENALTY_TIME não será mais usada, pois perderá vida
+
 
 // Ajustes de vidas
 const START_LIVES_TIMED_MODE = 3; // Vidas iniciais para o modo cronometrado
@@ -48,12 +46,12 @@ let lives; // Será definido ao iniciar o jogo
 
 // NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA
 let lifeCharge = 0;
-const LIFE_CHARGE_REQUIRED = 5; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
+const LIFE_CHARGE_REQUIRED = 4; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
 
-let MIN_ITEMS_ON_SCREEN = 4;
-const MAX_ITEMS_ON_SCREEN = 8;
-let DIFFICULTY_STEP = 10;
-const ITEM_SPEED_DECREMENT = 100;
+let MIN_ITEMS_ON_SCREEN = 1;
+const MAX_ITEMS_ON_SCREEN = 2;
+let DIFFICULTY_STEP = 100;
+const ITEM_SPEED_DECREMENT = 1000;
 const GENERATION_DELAY_DECREMENT = 20;
 
 let generationCount = 0; // Adicione esta variável global
