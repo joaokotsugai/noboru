@@ -21,12 +21,19 @@ let score = 0;
 let gameTime = 60; // Segundos de jogo para modo cronometrado
 let gameInterval; // Para o temporizador do jogo
 let itemGenerationInterval; // Para a geração de itens de poluição
-let itemSpeed = 4000; // Tempo em ms para o item subir (velocidade inicial MAIS RÁPIDA)
-let generationDelay = 1000; // A cada quantos ms um novo item aparece (MAIS FREQUENTE)
+let itemSpeed = 2000;           // Reduzido MUITO mais (era 9000)
+let generationDelay = 400;      // Reduzido para gerar itens mais rápido
+const MAX_ITEM_SPEED = 500;     // Velocidade máxima mais rápida (era 1000)
+const MIN_GENERATION_DELAY = 200; // Geração mínima mais rápida (era 300)
 let activeItems = []; // Guarda os itens de poluição atualmente na tela
 
 // --- CHAVES MAIS AMPLAS AGORA, MAS SÓ UMA ATIVA POR VEZ ---
-const possibleKeys = ['w', 'a', 's', 'd', 'q', 'e', 'r', 't', 'y', 'f', 'g', 'h', 'j', 'z', 'x', 'c', 'v', 'b']; 
+const possibleKeys = ['w', 'a', 's', 'd', 
+    'q', 'e', 'r', 
+    't', 'y', 'f', 
+    'g', 'h', 'j', 
+    'z', 'x', 'c', 
+    'v', 'b']; 
 
 let isGameRunning = false;
 let difficultyLevel = 0; // Controla o nível de dificuldade
@@ -43,29 +50,29 @@ let lives = START_LIVES;
 
 // NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA (MODO INFINITO)
 let lifeCharge = 0;
-const LIFE_CHARGE_REQUIRED = 3; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
+const LIFE_CHARGE_REQUIRED = 10; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
 
-// Controle mais lento de dificuldade: só aumenta a cada N gerações
-let generationCount = 0;
-const DIFFICULTY_STEP = 4; // aumenta dificuldade a cada 4 itens gerados
-const ITEM_SPEED_DECREMENT = 30; // decremento menor (era 50)
-const GENERATION_DELAY_DECREMENT = 5; // decremento menor (era 10)
-const MAX_ITEM_SPEED = 1000; // Velocidade máxima (item sobe em 1s)
-const MIN_GENERATION_DELAY = 300; // Geração mínima (item a cada 0.3s)
+// Adicione estas constantes importantes que estavam faltando
+const MIN_ITEMS_ON_SCREEN = 4;  // Mínimo de itens na tela
+const MAX_ITEMS_ON_SCREEN = 8;  // Máximo de itens na tela
+const DIFFICULTY_STEP = 10;     // A cada quantas gerações aumenta a dificuldade
+const ITEM_SPEED_DECREMENT = 100;
+const GENERATION_DELAY_DECREMENT = 20;
+
+let generationCount = 0; // Adicione esta variável global
 
 // Função para iniciar o jogo
 function startGame(mode = 'timed') {
-    // mode: 'timed' ou 'infinite'
+    // modo: 'tempo' ou 'infinito'
     isInfiniteMode = (mode === 'infinite');
 
     score = 0;
     gameTime = 60;
-    itemSpeed = 4000;
-    generationDelay = 1000;
+    itemSpeed = 2000;        // Mesmo valor inicial rápido
+    generationDelay = 400;   // Mesmo valor inicial rápido
     difficultyLevel = 0;
     activeItems = [];
     isGameRunning = true;
-    // agora começa com START_LIVES, mas pode acumular até MAX_LIVES
     lives = START_LIVES;
 
     // reset da recarga de vida
@@ -116,27 +123,30 @@ function startGame(mode = 'timed') {
 function generatePollutionItem() {
     if (!isGameRunning) return;
 
-    // Pega as teclas que já estão ativas na tela
-    const activeKeys = activeItems.map(item => item.dataset.key);
-    // Filtra as possibleKeys para encontrar as que não estão ativas
-    const availableKeys = possibleKeys.filter(key => !activeKeys.includes(key));
-
-    let key;
-    if (availableKeys.length > 0) {
-        // Se houver teclas disponíveis, escolhe uma aleatoriamente
-        key = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-    } else {
-        // Se todas as teclas já estiverem ativas, não gera um novo item com tecla repetida.
-        // Isso impede que itens se acumulem com a mesma tecla esperando para serem apertados.
-        return; 
+    // Garante um mínimo de itens na tela
+    if (activeItems.length < MIN_ITEMS_ON_SCREEN) {
+        createNewItem();
     }
 
+    // Permite mais itens até o limite máximo
+    if (activeItems.length >= MAX_ITEMS_ON_SCREEN) return;
+
+    createNewItem();
+}
+
+// Função auxiliar para criar novo item (separada para melhor organização)
+function createNewItem() {
+    const activeKeys = activeItems.map(item => item.dataset.key);
+    const availableKeys = possibleKeys.filter(key => !activeKeys.includes(key));
+
+    if (availableKeys.length === 0) return;
+
+    const key = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+
     const item = document.createElement('div');
-    // usar classe prefixada para evitar colisões com seletores genéricos
     item.classList.add('pollution-item', `key-${key}`);
     item.textContent = key.toUpperCase();
     item.dataset.key = key;
-    item.dataset.spawnTime = Date.now();
 
     const gameAreaWidth = gameArea.offsetWidth;
     const itemWidth = 70;
@@ -148,7 +158,7 @@ function generatePollutionItem() {
 
     item.style.transitionDuration = `${itemSpeed / 1000}s`;
     setTimeout(() => {
-        item.style.transform = `translateY(-${gameArea.offsetHeight + item.offsetHeight + 10}px)`; 
+        item.style.transform = `translateY(-${gameArea.offsetHeight + item.offsetHeight + 10}px)`;
     }, 50);
 
     item.addEventListener('transitionend', (e) => {
@@ -273,7 +283,10 @@ function increaseDifficulty() {
     if (generationCount % DIFFICULTY_STEP !== 0) return;
 
     difficultyLevel++;
-
+    
+    // Aumenta o número mínimo de itens conforme a dificuldade aumenta
+    MIN_ITEMS_ON_SCREEN = Math.min(8, 4 + Math.floor(difficultyLevel / 2));
+    
     // decrementos menores para dar mais tempo antes de ficar muito rápido
     itemSpeed = Math.max(MAX_ITEM_SPEED, itemSpeed - ITEM_SPEED_DECREMENT);
     generationDelay = Math.max(MIN_GENERATION_DELAY, generationDelay - GENERATION_DELAY_DECREMENT);
