@@ -15,9 +15,22 @@
     <div id="game-container">
         <h1 id="title">Defesa Aquática</h1>
         
+        <!-- História posicionada absolutamente -->
+        <div id="story" class="text-center px-4">
+            Em 2050, os oceanos estão à beira do colapso. Como último guardião das águas,
+            você tem 60 segundos para provar que a humanidade ainda pode mudar.
+            Cada pedaço de lixo que você remove é uma chance de mostrar que não é tarde demais.
+            Sobreviva por 1 minuto e inspire uma nova geração de defensores dos oceanos!
+        </div>
+
         <div id="score-info" class="hidden">PONTOS: <span id="current-score">0</span></div>
         <div id="timer-info" class="hidden">TEMPO: <span id="game-timer">60</span>s</div>
         <div id="lives-info" class="hidden">VIDAS: <span id="game-lives">3</span></div>
+
+        <!-- Modificar posição do botão voltar -->
+        <button id="back-during-game" class="absolute top-4 left-4 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-lg hidden">
+            VOLTAR
+        </button>
 
         <div id="instructions">
             Clique em "Começar" e pressione as teclas correspondentes<br>

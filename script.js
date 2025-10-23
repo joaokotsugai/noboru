@@ -15,6 +15,7 @@ const timerInfo = document.getElementById('timer-info');
 const livesInfo = document.getElementById('lives-info');
 const gameLivesSpan = document.getElementById('game-lives');
 const startMenu = document.getElementById('start-menu');
+const backDuringGame = document.getElementById('back-during-game');
 
 // Variáveis do jogo
 let score = 0;
@@ -68,55 +69,47 @@ function startGame(mode = 'timed') {
 
     score = 0;
     gameTime = 60;
-    itemSpeed = 2000;        // Mesmo valor inicial rápido
-    generationDelay = 400;   // Mesmo valor inicial rápido
+    itemSpeed = 2000;
+    generationDelay = 400;
     difficultyLevel = 0;
     activeItems = [];
     isGameRunning = true;
     lives = START_LIVES;
-
-    // reset da recarga de vida
     lifeCharge = 0;
     generationCount = 0;
 
-    // Resetar display e limpar a área de jogo
+    // Resetar display
     currentScoreSpan.textContent = score;
     gameTimerSpan.textContent = gameTime;
     gameLivesSpan.textContent = lives;
-    gameArea.innerHTML = ''; 
+    gameArea.innerHTML = '';
     
-    // Esconder/Mostrar elementos conforme o estado do jogo
+    // Esconder/Mostrar elementos
     gameOverScreen.classList.add('hidden');
     startMenu.classList.add('hidden');
     instructionsDiv.classList.add('hidden');
     titleDiv.classList.add('hidden');
     scoreInfo.classList.remove('hidden');
-    if (isInfiniteMode) {
-        timerInfo.classList.add('hidden');
-        livesInfo.classList.remove('hidden');
-    } else {
-        timerInfo.classList.remove('hidden');
-        livesInfo.classList.add('hidden');
-    }
+    timerInfo.classList.remove('hidden'); // Sempre mostra o timer
+    livesInfo.classList.remove('hidden'); // Sempre mostra as vidas
+    backDuringGame.classList.remove('hidden'); // Mostra botão de voltar
 
-    // Inicia o temporizador do jogo (só em modo cronometrado)
+    // Timer ainda funciona em ambos os modos
     clearInterval(gameInterval);
-    if (!isInfiniteMode) {
-        gameInterval = setInterval(() => {
-            gameTime--;
-            gameTimerSpan.textContent = gameTime;
-            if (gameTime <= 0) {
-                endGame();
-            }
-        }, 1000);
-    }
+    gameInterval = setInterval(() => {
+        gameTime--;
+        gameTimerSpan.textContent = gameTime;
+        if (gameTime <= 0 && lives > 0) { // Vitória se sobreviver com vidas
+            endGame(true); // true indica vitória
+        }
+    }, 1000);
 
-    // Ajusta o intervalo de geração para a primeira vez
-    clearInterval(itemGenerationInterval); // Garante que nenhum intervalo antigo esteja rodando
+    clearInterval(itemGenerationInterval);
     itemGenerationInterval = setInterval(generatePollutionItem, generationDelay);
 
-    // Adiciona o listener para as teclas
     document.addEventListener('keydown', handleKeyPress);
+
+    document.getElementById('story').classList.add('hidden');
 }
 
 // Função para gerar um item de poluição
@@ -208,9 +201,7 @@ function handleKeyPress(event) {
 
     const pressedKey = event.key.toLowerCase();
 
-    if (!possibleKeys.includes(pressedKey)) {
-        return;
-    }
+    if (!possibleKeys.includes(pressedKey)) return;
 
     const targetItem = activeItems.find(item => item.dataset.key === pressedKey);
 
@@ -222,58 +213,27 @@ function handleKeyPress(event) {
             removePollutionItem(targetItem);
         });
 
-        // NOVA LÓGICA: carregar vida apenas no modo infinito
-        if (isInfiniteMode) {
-            lifeCharge++;
-            // Quando atingir o necessário, recupera 1 vida (até MAX_LIVES).
-            // Se houver carga extra, pode gerar múltiplas vidas (até o limite).
-            while (lifeCharge >= LIFE_CHARGE_REQUIRED && lives < MAX_LIVES) {
-                lives = Math.min(MAX_LIVES, lives + 1);
-                lifeCharge -= LIFE_CHARGE_REQUIRED;
-            }
-            gameLivesSpan.textContent = lives;
-
-            // feedback visual rápido quando recupera ao menos 1 vida
-            if (gameArea.style.borderColor !== '') {
-                // já existe algum estilo, apenas flashar quando houve recuperação
-            }
-            // flash verde se recuperou alguma vida
-            // (apenas visual: detecta se lifeCharge foi reduzido recentemente)
-            // Para simplicidade, flash se a vida aumentou
-            // (não mantém prevBorder detalhado)
-            if (lives > 0) {
-                const prevBorder = gameArea.style.borderColor;
-                gameArea.style.borderColor = '#4ade80'; // verde claro
-                setTimeout(() => {
-                    gameArea.style.borderColor = prevBorder || '#3a506b';
-                }, 300);
-            }
+        // Recuperação de vida funciona em ambos os modos
+        lifeCharge++;
+        while (lifeCharge >= LIFE_CHARGE_REQUIRED && lives < MAX_LIVES) {
+            lives = Math.min(MAX_LIVES, lives + 1);
+            lifeCharge -= LIFE_CHARGE_REQUIRED;
         }
+        gameLivesSpan.textContent = lives;
     } else {
-        if (isInfiniteMode) {
-            // Perde uma vida no modo infinito
-            lives = Math.max(0, lives - 1);
-            gameLivesSpan.textContent = lives;
-            if (lives <= 0) {
-                endGame();
-            }
-            // Feedback visual de erro
-            gameArea.style.borderColor = '#ff4d4d';
-            setTimeout(() => {
-                gameArea.style.borderColor = '#3a506b';
-            }, 150);
-        } else {
-            // Penalidade por tecla errada no modo cronometrado
-            gameTime = Math.max(0, gameTime - WRONG_KEY_PENALTY_TIME);
-            gameTimerSpan.textContent = gameTime;
-            if (gameTime <= 0) {
-                endGame();
-            }
-            gameArea.style.borderColor = '#ff4d4d';
-            setTimeout(() => {
-                gameArea.style.borderColor = '#3a506b';
-            }, 150);
+        // Perda de vida em ambos os modos
+        lives = Math.max(0, lives - 1);
+        gameLivesSpan.textContent = lives;
+        
+        if (lives <= 0) {
+            endGame(false);
         }
+
+        // Feedback visual de erro
+        gameArea.style.borderColor = '#ff4d4d';
+        setTimeout(() => {
+            gameArea.style.borderColor = '#3a506b';
+        }, 150);
     }
 }
 
@@ -298,7 +258,7 @@ function increaseDifficulty() {
 }
 
 // Função para finalizar o jogo
-function endGame() {
+function endGame(victory = false) {
     isGameRunning = false;
     clearInterval(gameInterval);
     clearInterval(itemGenerationInterval);
@@ -306,21 +266,30 @@ function endGame() {
 
     finalScoreSpan.textContent = score;
     gameOverScreen.classList.remove('hidden');
+    
+    // Modificar o texto baseado em vitória ou derrota
+    const gameOverTitle = gameOverScreen.querySelector('h2');
+    if (victory) {
+        gameOverTitle.textContent = 'VITÓRIA!';
+        gameOverTitle.style.color = '#4ade80'; // Verde para vitória
+    } else {
+        gameOverTitle.textContent = 'FIM DE JOGO!';
+        gameOverTitle.style.color = '#ff6b6b'; // Vermelho para derrota
+    }
 
-    // Remove todos os itens que sobraram na tela
+    // Limpar e esconder elementos
     activeItems.forEach(item => {
         if (item.parentNode === gameArea) {
             gameArea.removeChild(item);
         }
     });
     activeItems = [];
-
-    // reset da recarga de vida ao terminar
     lifeCharge = 0;
 
     scoreInfo.classList.add('hidden');
     timerInfo.classList.add('hidden');
     livesInfo.classList.add('hidden');
+    backDuringGame.classList.add('hidden');
 }
 
 // Voltar para o menu inicial
@@ -349,6 +318,7 @@ function backToMenu() {
     startMenu.classList.remove('hidden');
     instructionsDiv.classList.remove('hidden');
     titleDiv.classList.remove('hidden');
+    document.getElementById('story').classList.remove('hidden'); // Adicionar esta linha
     scoreInfo.classList.add('hidden');
     timerInfo.classList.add('hidden');
     livesInfo.classList.add('hidden');
@@ -359,6 +329,11 @@ startButton.addEventListener('click', () => startGame('timed'));
 infiniteButton.addEventListener('click', () => startGame('infinite'));
 restartButton.addEventListener('click', () => startGame(isInfiniteMode ? 'infinite' : 'timed'));
 backButton.addEventListener('click', backToMenu);
+backDuringGame.addEventListener('click', () => {
+    if (confirm('Deseja realmente voltar ao menu? O progresso será perdido.')) {
+        backToMenu();
+    }
+});
 
 // Inicialização: Esconder tela de game over e score/timer no início
 gameOverScreen.classList.add('hidden');
