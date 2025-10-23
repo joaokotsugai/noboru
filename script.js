@@ -2,12 +2,12 @@
 const gameArea = document.getElementById('game-area');
 const currentScoreSpan = document.getElementById('current-score');
 const gameTimerSpan = document.getElementById('game-timer');
-const startButton = document.getElementById('start-button'); // ID corrigido para "start-button"
+const startButton = document.getElementById('start-button');
 const infiniteButton = document.getElementById('infinite-button');
 const instructionsDiv = document.getElementById('instructions');
 const titleDiv = document.getElementById('title');
 const gameOverScreen = document.getElementById('game-over-screen');
-const finalScoreSpan = document.getElementById('final-score');
+const finalScoreSpan = document = document.getElementById('final-score');
 const restartButton = document.getElementById('restart-button');
 const backButton = document.getElementById('back-button');
 const scoreInfo = document.getElementById('score-info');
@@ -22,13 +22,12 @@ let score = 0;
 let gameTime = 60; // Segundos de jogo para modo cronometrado
 let gameInterval; // Para o temporizador do jogo
 let itemGenerationInterval; // Para a geração de itens de poluição
-let itemSpeed = 2000;           // Reduzido MUITO mais (era 9000)
-let generationDelay = 400;      // Reduzido para gerar itens mais rápido
-const MAX_ITEM_SPEED = 500;     // Velocidade máxima mais rápida (era 1000)
-const MIN_GENERATION_DELAY = 200; // Geração mínima mais rápida (era 300)
+let itemSpeed = 2000;
+let generationDelay = 400;
+const MAX_ITEM_SPEED = 500;
+const MIN_GENERATION_DELAY = 200;
 let activeItems = []; // Guarda os itens de poluição atualmente na tela
 
-// --- CHAVES MAIS AMPLAS AGORA, MAS SÓ UMA ATIVA POR VEZ ---
 const possibleKeys = ['w', 'a', 's', 'd', 
     'q', 'e', 'r', 
     't', 'y', 'f', 
@@ -40,23 +39,23 @@ let isGameRunning = false;
 let difficultyLevel = 0; // Controla o nível de dificuldade
 
 // --- NOVAS VARIÁVEIS PARA DIFICULDADE E PENALIDADES ---
-const PASS_PENALTY_TIME = 3; // Segundos a perder se um item passar (modo cronometrado)
-const WRONG_KEY_PENALTY_TIME = 2; // Segundos a perder se apertar tecla errada (modo cronometrado)
+// REMOVIDA: PASS_PENALTY_TIME não será mais usada, pois perderá vida
+// REMOVIDA: WRONG_KEY_PENALTY_TIME não será mais usada, pois perderá vida
 
-// Ajustes de vidas: agora acumuláveis (começa com START_LIVES e pode crescer até MAX_LIVES)
-const START_LIVES = 3;        // vidas iniciais no modo infinito
-const MAX_LIVES = 6;          // cap de vidas acumuláveis (pode ajustar)
+// Ajustes de vidas
+const START_LIVES_TIMED_MODE = 3; // Vidas iniciais para o modo cronometrado
+const START_LIVES_INFINITE_MODE = 3; // Vidas iniciais para o modo infinito
+const MAX_LIVES = 6; // Cap de vidas acumuláveis (pode ajustar)
 let isInfiniteMode = false;
-let lives = START_LIVES;
+let lives; // Será definido ao iniciar o jogo
 
 // NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA (MODO INFINITO)
 let lifeCharge = 0;
 const LIFE_CHARGE_REQUIRED = 10; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
 
-// Adicione estas constantes importantes que estavam faltando
-const MIN_ITEMS_ON_SCREEN = 4;  // Mínimo de itens na tela
-const MAX_ITEMS_ON_SCREEN = 8;  // Máximo de itens na tela
-const DIFFICULTY_STEP = 10;     // A cada quantas gerações aumenta a dificuldade
+let MIN_ITEMS_ON_SCREEN = 4;
+const MAX_ITEMS_ON_SCREEN = 8;
+let DIFFICULTY_STEP = 10;
 const ITEM_SPEED_DECREMENT = 100;
 const GENERATION_DELAY_DECREMENT = 20;
 
@@ -64,7 +63,6 @@ let generationCount = 0; // Adicione esta variável global
 
 // Função para iniciar o jogo
 function startGame(mode = 'timed') {
-    // modo: 'tempo' ou 'infinito'
     isInfiniteMode = (mode === 'infinite');
 
     score = 0;
@@ -74,7 +72,7 @@ function startGame(mode = 'timed') {
     difficultyLevel = 0;
     activeItems = [];
     isGameRunning = true;
-    lives = START_LIVES;
+    lives = isInfiniteMode ? START_LIVES_INFINITE_MODE : START_LIVES_TIMED_MODE; // Define vidas iniciais com base no modo
     lifeCharge = 0;
     generationCount = 0;
 
@@ -89,27 +87,34 @@ function startGame(mode = 'timed') {
     startMenu.classList.add('hidden');
     instructionsDiv.classList.add('hidden');
     titleDiv.classList.add('hidden');
+    document.getElementById('story').classList.add('hidden');
     scoreInfo.classList.remove('hidden');
-    timerInfo.classList.remove('hidden'); // Sempre mostra o timer
-    livesInfo.classList.remove('hidden'); // Sempre mostra as vidas
-    backDuringGame.classList.remove('hidden'); // Mostra botão de voltar
+    livesInfo.classList.remove('hidden');
+    backDuringGame.classList.remove('hidden');
 
-    // Timer 
-    clearInterval(gameInterval);
-    gameInterval = setInterval(() => {
-        gameTime--;
-        gameTimerSpan.textContent = gameTime;
-        if (gameTime <= 0 && lives > 0) { // Vitória se sobreviver com vidas
-            endGame(true); // true indica vitória
-        }
-    }, 1000);
+    // Lógica para mostrar/esconder o timer com base no modo
+    if (isInfiniteMode) {
+        timerInfo.classList.add('hidden');
+        clearInterval(gameInterval);
+    } else {
+        timerInfo.classList.remove('hidden');
+        // Timer
+        clearInterval(gameInterval);
+        gameInterval = setInterval(() => {
+            gameTime--;
+            gameTimerSpan.textContent = gameTime;
+            if (gameTime <= 0 && lives > 0) { // O jogo termina por tempo no modo cronometrado
+                endGame(true); // true indica vitória se o tempo acabar e não tiver perdido vidas antes
+            } else if (gameTime <= 0 && lives <= 0) {
+                endGame(false); // Perdeu por tempo e sem vidas
+            }
+        }, 1000);
+    }
 
     clearInterval(itemGenerationInterval);
     itemGenerationInterval = setInterval(generatePollutionItem, generationDelay);
 
     document.addEventListener('keydown', handleKeyPress);
-
-    document.getElementById('story').classList.add('hidden');
 }
 
 // Função para gerar um item de poluição
@@ -162,20 +167,11 @@ function createNewItem() {
         // Garante que o jogo ainda esteja rodando e o item esteja na área
         if (!isGameRunning || item.parentNode !== gameArea) return;
 
-        if (isInfiniteMode) {
-            // Perde vida no modo infinito
-            lives = Math.max(0, lives - 1);
-            gameLivesSpan.textContent = lives;
-            if (lives <= 0) {
-                endGame();
-            }
-        } else {
-            // Perde tempo no modo cronometrado
-            gameTime = Math.max(0, gameTime - PASS_PENALTY_TIME);
-            gameTimerSpan.textContent = gameTime;
-            if (gameTime <= 0) {
-                endGame();
-            }
+        // MUDANÇA: Agora, perder vidas em AMBOS os modos se um item passar
+        lives = Math.max(0, lives - 1);
+        gameLivesSpan.textContent = lives;
+        if (lives <= 0) {
+            endGame(false); // Fim de jogo por perder todas as vidas
         }
 
         // Remove o item que escapou
@@ -201,7 +197,23 @@ function handleKeyPress(event) {
 
     const pressedKey = event.key.toLowerCase();
 
-    if (!possibleKeys.includes(pressedKey)) return;
+    // Se a tecla pressionada NÃO é uma das possíveisKeys, é um erro de digitação
+    if (!possibleKeys.includes(pressedKey)) {
+        // MUDANÇA: Perde vida em AMBOS os modos se apertar tecla errada
+        lives = Math.max(0, lives - 1);
+        gameLivesSpan.textContent = lives;
+        
+        if (lives <= 0) {
+            endGame(false); // Fim de jogo por perder todas as vidas
+        }
+
+        // Feedback visual de erro
+        gameArea.style.borderColor = '#ff4d4d';
+        setTimeout(() => {
+            gameArea.style.borderColor = '#3a506b';
+        }, 150);
+        return; 
+    }
 
     const targetItem = activeItems.find(item => item.dataset.key === pressedKey);
 
@@ -221,7 +233,7 @@ function handleKeyPress(event) {
         }
         gameLivesSpan.textContent = lives;
     } else {
-        // Perda de vida em ambos os modos
+        // Perda de vida ao apertar tecla de item que não existe (ou já passou/foi acertado por outro evento)
         lives = Math.max(0, lives - 1);
         gameLivesSpan.textContent = lives;
         
@@ -236,6 +248,7 @@ function handleKeyPress(event) {
         }, 150);
     }
 }
+
 
 // Função para aumentar a dificuldade
 function increaseDifficulty() {
@@ -287,7 +300,7 @@ function endGame(victory = false) {
     lifeCharge = 0;
 
     scoreInfo.classList.add('hidden');
-    timerInfo.classList.add('hidden');
+    timerInfo.classList.add('hidden'); // Ocultar o timer ao fim do jogo, independente do modo
     livesInfo.classList.add('hidden');
     backDuringGame.classList.add('hidden');
 }
@@ -307,8 +320,9 @@ function backToMenu() {
     gameArea.innerHTML = '';
     score = 0;
     currentScoreSpan.textContent = score;
-    gameTimerSpan.textContent = 60;
-    gameLivesSpan.textContent = MAX_LIVES;
+    gameTimerSpan.textContent = 60; // Resetar o timer para o valor padrão
+    // MUDANÇA: Resetar vidas para o valor inicial do modo cronometrado
+    gameLivesSpan.textContent = START_LIVES_TIMED_MODE; 
 
     // reset da recarga de vida ao voltar ao menu
     lifeCharge = 0;
@@ -318,7 +332,7 @@ function backToMenu() {
     startMenu.classList.remove('hidden');
     instructionsDiv.classList.remove('hidden');
     titleDiv.classList.remove('hidden');
-    document.getElementById('story').classList.remove('hidden'); // Adicionar esta linha
+    document.getElementById('story').classList.remove('hidden');
     scoreInfo.classList.add('hidden');
     timerInfo.classList.add('hidden');
     livesInfo.classList.add('hidden');
