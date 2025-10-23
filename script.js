@@ -23,17 +23,14 @@ let gameTime = 60; // Segundos de jogo para modo cronometrado
 let gameInterval; // Para o temporizador do jogo
 let itemGenerationInterval; // Para a geração de itens de poluição
 let itemSpeed = 2000;
-let generationDelay = 400;
+let generationDelay = 1000;
 const MAX_ITEM_SPEED = 500;
 const MIN_GENERATION_DELAY = 200;
 let activeItems = []; // Guarda os itens de poluição atualmente na tela
 
 const possibleKeys = ['w', 'a', 's', 'd', 
-    'q', 'e', 'r', 
-    't', 'y', 'f', 
-    'g', 'h', 'j', 
-    'z', 'x', 'c', 
-    'v', 'b']; 
+    'j', 'k', 'l', 
+    'i']; 
 
 let isGameRunning = false;
 let difficultyLevel = 0; // Controla o nível de dificuldade
@@ -49,9 +46,9 @@ const MAX_LIVES = 6; // Cap de vidas acumuláveis (pode ajustar)
 let isInfiniteMode = false;
 let lives; // Será definido ao iniciar o jogo
 
-// NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA (MODO INFINITO)
+// NOVAS VARIÁVEIS PARA RECUPERAÇÃO DE VIDA
 let lifeCharge = 0;
-const LIFE_CHARGE_REQUIRED = 10; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
+const LIFE_CHARGE_REQUIRED = 5; // Precisa apertar 3 teclas/acertos para recuperar 1 vida
 
 let MIN_ITEMS_ON_SCREEN = 4;
 const MAX_ITEMS_ON_SCREEN = 8;

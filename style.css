@@ -212,20 +212,11 @@ body {
 .pollution-item.key-d { background-color: #d1a347; } /* Laranja para D */
 
 /* NOVAS CORES PARA AS TECLAS ADICIONADAS */
-.pollution-item.key-q { background-color: #8b5cf6; } /* Roxo */
-.pollution-item.key-e { background-color: #ec4899; } /* Rosa */
-.pollution-item.key-r { background-color: #10b981; } /* Verde teal */
-.pollution-item.key-t { background-color: #f59e0b; } /* Amarelo */
-.pollution-item.key-y { background-color: #6366f1; } /* Índigo */
-.pollution-item.key-f { background-color: #06b6d4; } /* Ciano */
-.pollution-item.key-g { background-color: #f43f5e; } /* Rosa avermelhado */
-.pollution-item.key-h { background-color: #a855f7; } /* Violeta */
-.pollution-item.key-j { background-color: #0d9488; } /* Verde escuro */
-.pollution-item.key-z { background-color: #ef4444; } /* Vermelho mais forte */
-.pollution-item.key-x { background-color: #22c55e; } /* Verde brilhante */
-.pollution-item.key-c { background-color: #3b82f6; } /* Azul forte */
-.pollution-item.key-v { background-color: #f97316; } /* Laranja escuro */
-.pollution-item.key-b { background-color: #6b7280; } /* Cinza */
+.pollution-item.key-j { background-color: #8b5cf6; } /* Roxo */
+.pollution-item.key-k { background-color: #ec4899; } /* Rosa */
+.pollution-item.key-l { background-color: #10b981; } /* Verde teal */
+.pollution-item.key-i { background-color: #f59e0b; } /* Amarelo */
+
 /* Adicione mais se expandir 'possibleKeys' ainda mais! */
 
 
@@ -265,3 +256,9 @@ body {
     transform: translateY(4px); /* Efeito de pressionar */
     box-shadow: 0 4px #2d66cf;
 }
+#muscia {
+    display: hidden;
+}
+audio {
+    display: none;
+  }
